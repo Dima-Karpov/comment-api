@@ -3,36 +3,63 @@ package main
 import (
 	delivery "comment-api/internal/delivery/server"
 	"comment-api/pkg/handler"
-	"comment-api/pkg/repository"
+	"comment-api/pkg/repository/postgres"
 	"comment-api/pkg/service"
 	"context"
-	"fmt"
+	"github.com/joho/godotenv"
+	_ "github.com/lib/pq"
 	"github.com/sirupsen/logrus"
+	"github.com/spf13/viper"
 	"os"
 	"os/signal"
 	"syscall"
 )
 
 func main() {
-	logrus.SetFormatter(new(logrus.JSONFormatter))
-	filePath := "example.json"
-	file, err := os.Create(filePath)
-	if err != nil {
-		logrus.Fatalf("failed to initialize %s: %s", filePath, err.Error())
+	logrus.SetFormatter(&logrus.TextFormatter{
+		FullTimestamp:   true,
+		TimestampFormat: "2006-01-02T15:04:05.000Z07:00",
+		DisableColors:   false,
+		ForceQuote:      true,
+		PadLevelText:    true,
+	})
+
+	if err := initConfig(); err != nil {
+		logrus.Fatalf("error initializing configs: %s", err.Error())
 	}
-	defer file.Close()
+	// Загрузка переменных окружения из файла .env
+	if err := godotenv.Load(); err != nil {
+		logrus.Fatalf("Error loading .env file")
+	}
 
-	fmt.Println("Файл создан успешно.")
+	logrus.Print(viper.GetString("db.host"))
+	logrus.Print(os.Getenv(viper.GetString("db.port")))
+	logrus.Print(os.Getenv(viper.GetString("db.password")))
+	logrus.Print(viper.GetString("db.dbname"))
+	logrus.Print(viper.GetString("db.sslmode"))
 
-	localFile := &repository.LocalFile{Path: filePath}
+	db, err := postgres.NewPostgresDB(
+		postgres.Config{
+			Host:     viper.GetString("db.host"),
+			Port:     os.Getenv(viper.GetString("db.port")),
+			Username: os.Getenv(viper.GetString("db.username")),
+			Password: os.Getenv(viper.GetString("db.password")),
+			DBName:   viper.GetString("db.dbname"),
+			SSLMode:  viper.GetString("db.sslmode"),
+		},
+	)
+	if err != nil {
+		logrus.Fatalf("failed to initialize db: %s", err.Error())
+	}
 
-	repos := repository.NewRepository(localFile)
-	services := service.NewService(repos)
+	reposPostgres := postgres.NewRepositoryPostgres(db)
+	filter := service.NewProfaneFilterService(os.Getenv("PROFANE_WORDS_API"))
+	services := service.NewService(reposPostgres, filter)
 	newHandler := handler.NewHandler(services)
 
 	srv := new(delivery.Server)
 	go func() {
-		if err := srv.Run("8088", newHandler.InitRoutes()); err != nil {
+		if err := srv.Run(os.Getenv("COMMENT_API_PORT"), newHandler.InitRoutes()); err != nil {
 			logrus.Fatalf("Error occured while running http sever: %s", err.Error())
 		}
 	}()
@@ -48,4 +75,10 @@ func main() {
 	if err := srv.Shutdown(context.Background()); err != nil {
 		logrus.Errorf("error occured on server shugging down: %s", err.Error())
 	}
+}
+
+func initConfig() error {
+	viper.AddConfigPath("configs")
+	viper.SetConfigName("config")
+	return viper.ReadInConfig()
 }

@@ -1,8 +1,10 @@
 package handler
 
 import (
+	"comment-api/pkg/middleware"
 	"comment-api/pkg/service"
 	"github.com/gin-gonic/gin"
+	"github.com/sirupsen/logrus"
 )
 
 type Handler struct {
@@ -15,7 +17,11 @@ func NewHandler(services *service.Service) *Handler {
 
 func (h *Handler) InitRoutes() *gin.Engine {
 	router := gin.New()
-	comment := router.Group("/comment")
+
+	logger := logrus.New()
+	router.Use(middleware.RequestLoggerMiddleware(logger))
+
+	comment := router.Group("/v1/comment")
 	{
 		comment.POST("/", h.createComment)
 		comment.GET("/:id", h.getComment)

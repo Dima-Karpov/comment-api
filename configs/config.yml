@@ -1,0 +1,7 @@
+db:
+  host: "db"
+  port: "POSTGRES_DB_PORT"
+  username: "POSTGRES_USER"
+  password: "POSTGRES_PASSWORD"
+  dbname: "postgres"
+  sslmode: "disable"

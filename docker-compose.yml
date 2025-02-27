@@ -1,0 +1,55 @@
+services:
+  api:
+    container_name: comment-api
+    networks:
+      - my_custom_network
+    ports:
+      - "8088:8088"
+    build:
+      context: .
+    restart: unless-stopped
+    depends_on:
+      - db
+    env_file:
+      - .env
+    command: /bin/sh -c "sleep 10 && /app"  # Ждем 10 секунд перед запуском
+
+  db:
+    container_name: comment-db
+    networks:
+      - my_custom_network
+    image: postgres:13
+    platform: linux/x86_64
+    restart: always
+    ports:
+      - "5444:5432"
+    environment:
+      - POSTGRES_USER
+      - POSTGRES_PASSWORD
+      - POSTGRES_DB
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./migrations:/migrations
+
+  migrate:
+    image: postgres:13
+    depends_on:
+      - db
+    command: >
+      bash -c "set -x &&
+      export PGPASSWORD=$POSTGRES_PASSWORD &&
+      until pg_isready -h db -p 5432 -U postgres; do sleep 1; done &&
+      psql -h db -U postgres -d api -f /migrations/schema/up.sql"
+    environment:
+      - POSTGRES_USER
+      - POSTGRES_PASSWORD
+      - POSTGRES_DB
+    volumes:
+      - ./migrations:/migrations
+
+volumes:
+  pgdata:
+
+networks:
+  my_custom_network:
+    external: true

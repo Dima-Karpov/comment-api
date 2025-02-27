@@ -15,6 +15,13 @@ import (
 	"syscall"
 )
 
+// @title Comment API
+// @version 1.0
+// @description API Server for CommentApi Application
+
+// @host localhost:8088
+// @BasePath /
+
 func main() {
 	logrus.SetFormatter(&logrus.TextFormatter{
 		FullTimestamp:   true,

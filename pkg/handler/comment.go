@@ -9,6 +9,18 @@ import (
 	"net/http"
 )
 
+// @Summary Create comment
+// @Tags comments
+// @Description create comment
+// @ID create-comment
+// @Accept  json
+// @Produce  json
+// @Param input body domain.CommentList true "list info"
+// @Success 200 {object} domain.CreateCommentResponse
+// @Failure 400,404 {object} errorResponse
+// @Failure 500 {object} errorResponse
+// @Failure default {object} errorResponse
+// @Router /v1/comment [post]
 func (h *Handler) createComment(c *gin.Context) {
 	var input domain.CommentList
 
@@ -43,6 +55,18 @@ func (h *Handler) createComment(c *gin.Context) {
 	})
 }
 
+// @Summary Get Comment By EntityId
+// @Tags comments
+// @Description get comment by id
+// @ID get-comment-by-entityId
+// @Accept  json
+// @Produce  json
+// @Param entityId path string true "ID list (UUID)"
+// @Success 200 {object} domain.Comment
+// @Failure 400,404 {object} errorResponse
+// @Failure 500 {object} errorResponse
+// @Failure default {object} errorResponse
+// @Router /v1/comment/{entityId} [get]
 func (h *Handler) getComment(c *gin.Context) {
 	idStr := c.Param("id")
 	id, err := uuid.Parse(idStr)
@@ -59,6 +83,19 @@ func (h *Handler) getComment(c *gin.Context) {
 
 	c.JSON(http.StatusOK, comment)
 }
+
+// @Summary Delete comment
+// @Tags comments
+// @Description delete comment
+// @ID delete-comment
+// @Accept  json
+// @Produce  json
+// @Param commentId path string true "ID list (UUID)"
+// @Success 200 {object} statusResponse
+// @Failure 400,404 {object} errorResponse
+// @Failure 500 {object} errorResponse
+// @Failure default {object} errorResponse
+// @Router /v1/comment/{commentId} [delete]
 func (h *Handler) deleteComment(c *gin.Context) {
 	idStr := c.Param("id")
 	id, err := uuid.Parse(idStr)
@@ -75,6 +112,20 @@ func (h *Handler) deleteComment(c *gin.Context) {
 
 	c.JSON(http.StatusOK, statusResponse{"ok"})
 }
+
+// @Summary Update comment
+// @Tags comments
+// @Description comment post
+// @ID comment-post
+// @Accept  json
+// @Produce  json
+// @Param commentId path string true "ID list (UUID)"
+// @Param data body domain.UpdateCommentList true "Data for list"
+// @Success 200 {object} statusResponse
+// @Failure 400,404 {object} errorResponse
+// @Failure 500 {object} errorResponse
+// @Failure default {object} errorResponse
+// @Router /v1/comment/{commentId} [put]
 func (h *Handler) updateComment(c *gin.Context) {
 	idStr := c.Param("id")
 	id, err := uuid.Parse(idStr)

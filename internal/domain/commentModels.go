@@ -23,3 +23,7 @@ type Comment struct {
 	UpdatedAt   time.Time `json:"updated_at" db:"updated_at"`
 	Children    []Comment `json:"children"`
 }
+
+type CreateCommentResponse struct {
+	Id int
+}

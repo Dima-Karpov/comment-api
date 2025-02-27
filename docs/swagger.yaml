@@ -1,4 +1,214 @@
+basePath: /
+definitions:
+  domain.Comment:
+    properties:
+      children:
+        items:
+          $ref: '#/definitions/domain.Comment'
+        type: array
+      created_at:
+        type: string
+      description:
+        type: string
+      id:
+        type: string
+      parent_id:
+        type: string
+      updated_at:
+        type: string
+    type: object
+  domain.CommentList:
+    properties:
+      description:
+        type: string
+      entity_id:
+        type: string
+      parent_id:
+        type: string
+    type: object
+  domain.CreateCommentResponse:
+    properties:
+      id:
+        type: integer
+    type: object
+  domain.UpdateCommentList:
+    properties:
+      description:
+        type: string
+    type: object
+  handler.errorResponse:
+    properties:
+      message:
+        type: string
+    type: object
+  handler.statusResponse:
+    properties:
+      status:
+        type: string
+    type: object
+host: localhost:8088
 info:
   contact: {}
-paths: {}
+  description: API Server for CommentApi Application
+  title: Comment API
+  version: "1.0"
+paths:
+  /v1/comment:
+    post:
+      consumes:
+      - application/json
+      description: create comment
+      operationId: create-comment
+      parameters:
+      - description: list info
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/domain.CommentList'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/domain.CreateCommentResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handler.errorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/handler.errorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/handler.errorResponse'
+        default:
+          description: ""
+          schema:
+            $ref: '#/definitions/handler.errorResponse'
+      summary: Create comment
+      tags:
+      - comments
+  /v1/comment/{commentId}:
+    delete:
+      consumes:
+      - application/json
+      description: delete comment
+      operationId: delete-comment
+      parameters:
+      - description: ID list (UUID)
+        in: path
+        name: commentId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handler.statusResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handler.errorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/handler.errorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/handler.errorResponse'
+        default:
+          description: ""
+          schema:
+            $ref: '#/definitions/handler.errorResponse'
+      summary: Delete comment
+      tags:
+      - comments
+    put:
+      consumes:
+      - application/json
+      description: comment post
+      operationId: comment-post
+      parameters:
+      - description: ID list (UUID)
+        in: path
+        name: commentId
+        required: true
+        type: string
+      - description: Data for list
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/domain.UpdateCommentList'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handler.statusResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handler.errorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/handler.errorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/handler.errorResponse'
+        default:
+          description: ""
+          schema:
+            $ref: '#/definitions/handler.errorResponse'
+      summary: Update comment
+      tags:
+      - comments
+  /v1/comment/{entityId}:
+    get:
+      consumes:
+      - application/json
+      description: get comment by id
+      operationId: get-comment-by-entityId
+      parameters:
+      - description: ID list (UUID)
+        in: path
+        name: entityId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/domain.Comment'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handler.errorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/handler.errorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/handler.errorResponse'
+        default:
+          description: ""
+          schema:
+            $ref: '#/definitions/handler.errorResponse'
+      summary: Get Comment By EntityId
+      tags:
+      - comments
 swagger: "2.0"
